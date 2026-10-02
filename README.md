@@ -14,7 +14,7 @@ The core of the project is the **engineered evaluation prompt** (`server/src/pro
    |  2. Extract text from PDF (pdf-parse) / DOCX (mammoth)
    |  3. Build the evaluation prompt (role + rubric + few-shot + output format)
    v
-[Anthropic Messages API (Claude)]
+[LLM API — Google Gemini (default) or Anthropic Claude]
    |  4. Model returns JSON, constrained by a JSON schema (structured outputs)
    v
 [Express]
@@ -33,7 +33,8 @@ The core of the project is the **engineered evaluation prompt** (`server/src/pro
 | `server/src/index.js` | Express app, upload handling, error handling |
 | `server/src/extractText.js` | PDF/DOCX -> clean plain text |
 | `server/src/prompt.js` | **The evaluation prompt** and output JSON schema |
-| `server/src/analyze.js` | Claude API call + response validation |
+| `server/src/analyze.js` | Picks the LLM provider, parses + validates the response |
+| `server/src/providers/` | `gemini.js` and `anthropic.js` — one API call each, same prompt and schema |
 | `samples/` | Fictional test resumes (+ generator script) |
 | `docs/PROMPT_ITERATIONS.md` | Log of prompt versions and test results |
 
@@ -48,13 +49,13 @@ Errors come back as `{ "error": "message" }` with a 4xx/5xx status.
 
 ## Run locally
 
-Requires Node.js 20+ and an Anthropic API key.
+Requires Node.js 20+ and a Gemini API key (or an Anthropic API key).
 
 ```bash
 # 1. Backend (http://localhost:5000)
 cd server
 npm install
-cp .env.example .env        # then set ANTHROPIC_API_KEY
+cp .env.example .env        # then set GEMINI_API_KEY
 npm run dev
 
 # 2. Frontend (http://localhost:5173) — in a second terminal
@@ -71,11 +72,15 @@ No API key yet? Start the backend with `MOCK_LLM=true` in `.env` to get canned r
 
 | Variable | Default | Notes |
 | --- | --- | --- |
-| `ANTHROPIC_API_KEY` | — | Required unless `MOCK_LLM=true` |
+| `LLM_PROVIDER` | `anthropic` | `gemini` or `anthropic` (`.env.example` sets `gemini`) |
+| `GEMINI_API_KEY` | — | Required for `gemini` |
+| `GEMINI_MODEL` | `gemini-3.5-flash` | Pinned for consistent scores |
+| `GEMINI_FALLBACK_MODELS` | `gemini-flash-latest,gemini-flash-lite-latest` | Tried in order if the main model is overloaded (429/5xx) |
+| `ANTHROPIC_API_KEY` | — | Required for `anthropic` |
 | `ANTHROPIC_MODEL` | `claude-opus-5-5` | |
-| `ANTHROPIC_EFFORT` | `low` | `low` / `medium` / `high`; higher is slower but more thorough |
+| `ANTHROPIC_EFFORT` | `low` | `low` / `medium` / `high` |
 | `PORT` | `5000` | |
-| `MOCK_LLM` | `false` | Skip the Claude call |
+| `MOCK_LLM` | `false` | Skip the LLM call and return canned results |
 
 ## Tests
 

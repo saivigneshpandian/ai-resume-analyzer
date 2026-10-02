@@ -1,25 +1,13 @@
-import Anthropic from '@anthropic-ai/sdk'
 import { ANALYSIS_SCHEMA, SYSTEM_PROMPT, buildUserMessage } from './prompt.js'
+import { AnalysisError } from './errors.js'
+import { generateWithAnthropic } from './providers/anthropic.js'
+import { generateWithGemini } from './providers/gemini.js'
 
-const MODEL = process.env.ANTHROPIC_MODEL || 'claude-opus-5-5'
-// 'low' keeps responses inside the brief's ~10-15 s target; raise for deeper reviews.
-const EFFORT = process.env.ANTHROPIC_EFFORT || 'low'
+export { AnalysisError }
 
-let client
-function getClient() {
-  if (!process.env.ANTHROPIC_API_KEY) {
-    throw new AnalysisError('The server is missing ANTHROPIC_API_KEY. Add it to server/.env and restart.', 500)
-  }
-  client ??= new Anthropic()
-  return client
-}
-
-export class AnalysisError extends Error {
-  constructor(message, status = 502) {
-    super(message)
-    this.status = status
-  }
-}
+// Both providers receive the identical prompt (brief Section 7) and JSON schema.
+const PROVIDERS = { anthropic: generateWithAnthropic, gemini: generateWithGemini }
+export const PROVIDER = (process.env.LLM_PROVIDER || 'anthropic').toLowerCase()
 
 const clampScore = (n) => Math.max(0, Math.min(100, Math.round(n)))
 const cleanList = (items, max) =>
@@ -55,51 +43,16 @@ export function validateAnalysis(data, hasJobDescription) {
 }
 
 export async function analyzeResume(resumeText, jobDescription) {
-  const hasJobDescription = Boolean(jobDescription)
-
-  let response
-  try {
-    response = await getClient().beta.messages.create({
-      model: MODEL,
-      max_tokens: 16000,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: buildUserMessage(resumeText, jobDescription) }],
-      output_config: {
-        effort: EFFORT,
-        format: { type: 'json_schema', schema: ANALYSIS_SCHEMA },
-      },
-      // If a safety classifier declines, retry server-side on Anthropic's recommended fallback model.
-      betas: ['server-side-fallback-2026-07-01'],
-      fallbacks: 'default',
-    })
-  } catch (err) {
-    if (err instanceof Anthropic.AuthenticationError) {
-      throw new AnalysisError('The server’s Anthropic API key was rejected. Check ANTHROPIC_API_KEY.', 500)
-    }
-    if (err instanceof Anthropic.RateLimitError) {
-      throw new AnalysisError('The AI service is busy right now. Please try again in a minute.', 503)
-    }
-    if (err instanceof Anthropic.APIConnectionError) {
-      throw new AnalysisError('Could not reach the AI service. Please try again.', 503)
-    }
-    if (err instanceof Anthropic.APIError) {
-      console.error('[analyze] Anthropic API error', err.status, err.message)
-      throw new AnalysisError('The AI service returned an error. Please try again.')
-    }
-    throw err
+  const generate = PROVIDERS[PROVIDER]
+  if (!generate) {
+    throw new AnalysisError(`Unknown LLM_PROVIDER "${PROVIDER}". Use "anthropic" or "gemini".`, 500)
   }
 
-  if (response.stop_reason === 'refusal') {
-    throw new AnalysisError('The AI declined to analyze this document. Please check it is a resume.', 422)
-  }
-  if (response.stop_reason === 'max_tokens') {
-    throw new AnalysisError('The analysis was cut off before it finished. Please try again.')
-  }
-
-  const text = response.content
-    .filter((block) => block.type === 'text')
-    .map((block) => block.text)
-    .join('')
+  const text = await generate({
+    system: SYSTEM_PROMPT,
+    user: buildUserMessage(resumeText, jobDescription),
+    schema: ANALYSIS_SCHEMA,
+  })
 
   let parsed
   try {
@@ -108,9 +61,5 @@ export async function analyzeResume(resumeText, jobDescription) {
     console.error('[analyze] Model returned non-JSON output:', text.slice(0, 500))
     throw new AnalysisError('The AI returned an unreadable response. Please try again.')
   }
-
-  console.log(
-    `[analyze] model=${response.model} in=${response.usage.input_tokens} out=${response.usage.output_tokens} tokens`,
-  )
-  return validateAnalysis(parsed, hasJobDescription)
+  return validateAnalysis(parsed, Boolean(jobDescription))
 }

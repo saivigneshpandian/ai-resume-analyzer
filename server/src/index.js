@@ -2,7 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import multer from 'multer'
 import { detectFileType, extractText, ExtractionError } from './extractText.js'
-import { analyzeResume, AnalysisError } from './analyze.js'
+import { analyzeResume, AnalysisError, PROVIDER } from './analyze.js'
 import { mockAnalysis } from './mockAnalysis.js'
 
 const PORT = process.env.PORT || 5000
@@ -66,5 +66,5 @@ app.use((err, req, res, next) => {
 })
 
 app.listen(PORT, () => {
-  console.log(`Resume Analyzer API listening on http://localhost:${PORT}`)
+  console.log(`Resume Analyzer API listening on http://localhost:${PORT} (${MOCK_LLM ? 'MOCK_LLM mode' : `LLM: ${PROVIDER}`})`)
 })
