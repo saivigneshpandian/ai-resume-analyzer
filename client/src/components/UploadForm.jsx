@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import Icon from './Icon'
 
 const ACCEPTED_EXTENSIONS = ['.pdf', '.docx']
-const MAX_SIZE_MB = 5
+const MAX_SIZE_MB = 4
 
 function validateFile(file) {
   const name = file.name.toLowerCase()

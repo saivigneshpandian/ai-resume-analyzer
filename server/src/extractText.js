@@ -1,4 +1,5 @@
 import { PDFParse } from 'pdf-parse'
+import { getData as getPdfWorker } from 'pdf-parse/worker'
 import mammoth from 'mammoth'
 
 export const SUPPORTED_TYPES = {
@@ -7,6 +8,9 @@ export const SUPPORTED_TYPES = {
 }
 
 export class ExtractionError extends Error {}
+
+// Embed pdf.js's worker as a data URL so PDF parsing also works in serverless bundles (Vercel)
+PDFParse.setWorker(getPdfWorker())
 
 // Work out the file type from extension + MIME type (browsers sometimes send
 // a generic MIME type for DOCX, so the extension is the primary signal).

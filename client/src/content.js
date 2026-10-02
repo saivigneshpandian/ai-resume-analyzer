@@ -112,7 +112,7 @@ export const faq = {
     {
       question: 'Which files work?',
       answer:
-        'PDF and DOCX up to 5 MB. The file needs selectable text — scanned images of a resume can’t be read. Feedback is tuned for software and technical roles.',
+        'PDF and DOCX up to 4 MB. The file needs selectable text — scanned images of a resume can’t be read. Feedback is tuned for software and technical roles.',
     },
     {
       question: 'Do I need an account or to pay?',

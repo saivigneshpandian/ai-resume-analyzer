@@ -21,6 +21,7 @@ The core of the project is an **engineered evaluation prompt** (role, fixed rubr
 - [Configuration](#configuration)
 - [API](#api)
 - [Project structure](#project-structure)
+- [Deploy to Vercel](#deploy-to-vercel)
 - [Testing](#testing)
 - [Design notes](#design-notes)
 - [Security and privacy](#security-and-privacy)
@@ -33,7 +34,7 @@ The core of the project is an **engineered evaluation prompt** (role, fixed rubr
 
 | Area | What it does |
 | --- | --- |
-| Upload | Drag-and-drop or browse, PDF/DOCX up to 5 MB, client-side type/size checks |
+| Upload | Drag-and-drop or browse, PDF/DOCX up to 4 MB, client-side type/size checks |
 | Job description | Optional textarea; adds a job-match score and missing-keyword list |
 | Text extraction | `pdf-parse` (PDF, all pages) and `mammoth` (DOCX), whitespace cleanup, rejects image-only files |
 | AI evaluation | One structured-output LLM call per resume using the Section 7 prompt |
@@ -131,7 +132,7 @@ All settings live in `server/.env` (see [`server/.env.example`](server/.env.exam
 
 | Variable | Default | Notes |
 | --- | --- | --- |
-| `LLM_PROVIDER` | `anthropic` | `gemini` or `anthropic` (`.env.example` sets `gemini`) |
+| `LLM_PROVIDER` | `gemini` | `gemini` or `anthropic` |
 | `GEMINI_API_KEY` | — | Required for `gemini` |
 | `GEMINI_MODEL` | `gemini-3.5-flash` | Pinned version for consistent scores between runs |
 | `GEMINI_FALLBACK_MODELS` | `gemini-flash-latest,gemini-flash-lite-latest` | Tried in order, with backoff, if the main model is overloaded (429/5xx) |
@@ -140,6 +141,7 @@ All settings live in `server/.env` (see [`server/.env.example`](server/.env.exam
 | `ANTHROPIC_EFFORT` | `low` | `low` / `medium` / `high` — higher is slower but more thorough |
 | `PORT` | `5000` | |
 | `MOCK_LLM` | `false` | Skip the LLM call and return canned results |
+| `LOG_RESUME_TEXT` | `true` locally, `false` on Vercel | Log extracted resume text and results to the console |
 
 ## API
 
@@ -173,7 +175,7 @@ Response shape:
 
 | Status | When |
 | --- | --- |
-| 400 | No file, file over 5 MB, job description over 20,000 characters |
+| 400 | No file, file over 4 MB, job description over 20,000 characters |
 | 415 | Not a PDF or DOCX |
 | 422 | Corrupt/password-protected file, no readable text (scanned image), or the AI declined the document |
 | 500 | Server missing or using an invalid API key |
@@ -201,7 +203,8 @@ ai-resume-analyzer/
 ├── server/                      Express backend
 │   ├── .env.example
 │   ├── src/
-│   │   ├── index.js             Routes, upload handling, error handler
+│   │   ├── app.js               Express app: routes, upload handling, error handler
+│   │   ├── index.js             Local entry point (app.listen)
 │   │   ├── extractText.js       PDF/DOCX → clean text
 │   │   ├── prompt.js            The evaluation prompt + JSON schema
 │   │   ├── analyze.js           Provider choice, parsing, validation
@@ -211,9 +214,38 @@ ai-resume-analyzer/
 │   │       ├── gemini.js
 │   │       └── anthropic.js
 │   └── test/analyze.test.js     node:test unit tests
+├── api/index.js                 Vercel Function entry (exports the Express app)
+├── vercel.json                  Vercel build + routing config
 ├── samples/                     Fictional test resumes, sample JD, generator script
 └── docs/PROMPT_ITERATIONS.md    Prompt version log
 ```
+
+## Deploy to Vercel
+
+The repo is set up to deploy as **one Vercel project**: the React app is served as static files and the Express API runs as a Vercel Function.
+
+| File | Role |
+| --- | --- |
+| [`vercel.json`](vercel.json) | Installs `server/` + `client/`, builds the client to `client/dist`, routes `/api/*` to the function (60 s max duration) |
+| [`api/index.js`](api/index.js) | Vercel Function — exports the Express app from `server/src/app.js` |
+| `server/src/index.js` | Local entry point only (`app.listen`), not used on Vercel |
+
+**Steps**
+
+1. Push the repo to GitHub.
+2. In Vercel: **Add New… → Project → Import** `ai-resume-analyzer`. Keep **Root Directory** as the repo root (`./`); `vercel.json` supplies the build settings.
+3. Under **Environment Variables**, add:
+   - `GEMINI_API_KEY` — your Google AI Studio key
+   - `LLM_PROVIDER` — `gemini` (optional; it's the default)
+4. Click **Deploy**. Open the `*.vercel.app` URL and upload a resume.
+
+Every later push to the connected branch redeploys automatically. Or deploy from your machine with the CLI: `npm i -g vercel && vercel` (preview) then `vercel --prod`.
+
+**Notes**
+
+- Uploads are capped at **4 MB** because Vercel Functions reject request bodies over 4.5 MB.
+- On Vercel the server does not log resume text or results (it only logs sizes, model and timings). Set `LOG_RESUME_TEXT=true` to override for debugging.
+- No `VITE_API_URL` is needed: the frontend and `/api` share the same domain.
 
 ## Testing
 
@@ -267,7 +299,7 @@ Regenerate the resumes with `pip install reportlab python-docx && python3 sample
 - Uploaded files are kept **in memory only** and never written to disk or a database. The extracted text is sent to the configured LLM provider for analysis.
 - API keys belong in `server/.env`, which is git-ignored. If a key is ever shared in chat, a screenshot or a commit, rotate it.
 - The prompt tells the model to treat resume and job-description text as data and to ignore instructions inside them.
-- Uploads are limited to PDF/DOCX up to 5 MB; job descriptions to 20,000 characters.
+- Uploads are limited to PDF/DOCX up to 4 MB (Vercel Functions cap request bodies at 4.5 MB); job descriptions to 20,000 characters.
 
 ## Troubleshooting
 

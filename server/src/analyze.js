@@ -7,7 +7,7 @@ export { AnalysisError }
 
 // Both providers receive the identical prompt (brief Section 7) and JSON schema.
 const PROVIDERS = { anthropic: generateWithAnthropic, gemini: generateWithGemini }
-export const PROVIDER = (process.env.LLM_PROVIDER || 'anthropic').toLowerCase()
+export const PROVIDER = (process.env.LLM_PROVIDER || 'gemini').toLowerCase()
 
 const clampScore = (n) => Math.max(0, Math.min(100, Math.round(n)))
 const cleanList = (items, max) =>
