@@ -27,7 +27,8 @@ The core of the project is the **engineered evaluation prompt** (`server/src/pro
 | Path | Purpose |
 | --- | --- |
 | `client/src/App.jsx` | Upload -> loading -> results state machine |
-| `client/src/components/` | `UploadForm`, `LoadingState`, `Results`, `ScoreRing` |
+| `client/src/components/` | `Landing` (marketing sections + upload), `UploadForm`, `LoadingState`, `Results`, `ScoreRing`, `PenMark` |
+| `client/src/content.js` | All landing-page copy (hero, problem, how it works, benefits, FAQ, CTA) |
 | `client/src/api.js` | Calls `POST /api/analyze` |
 | `server/src/index.js` | Express app, upload handling, error handling |
 | `server/src/extractText.js` | PDF/DOCX -> clean plain text |
