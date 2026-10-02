@@ -3,7 +3,7 @@ import Landing from './components/Landing'
 import LoadingState from './components/LoadingState'
 import Results from './components/Results'
 import Icon from './components/Icon'
-import { analyzeResume } from './api'
+import { analyzeResume, IS_DEMO } from './api'
 
 const YEAR = new Date().getFullYear()
 
@@ -114,6 +114,12 @@ export default function App() {
       >
         Skip to content
       </a>
+      {IS_DEMO && (
+        <p className="border-b border-warn/20 bg-warn-soft px-4 py-2.5 text-center text-sm text-warn">
+          <strong className="font-semibold">Preview mode:</strong> any upload shows one saved example — a real Gemini review of a
+          fictional student resume against an Agentic AI Engineer job description. Your file is not analyzed.
+        </p>
+      )}
       <SiteHeader view={view} onHome={goHome} />
 
       <main id="main" className="flex-1">

@@ -1,0 +1,44 @@
+{
+  "_note": "Real Gemini (gemini-3.5-flash) output for samples/sample-resume.pdf (fictional) against samples/agentic-ai-engineer-jd.txt. Used only by the VITE_DEMO preview build.",
+  "analysis": {
+    "overall_score": 45,
+    "jd_match_score": 15,
+    "strengths": [
+      "Solid foundation in full-stack web technologies including Python, React, Node.js, and SQL.",
+      "Practical industry exposure through a 3-month Software Development internship at TechNova Solutions.",
+      "Demonstrates initiative by participating in competitive programming events like the Smart India Hackathon 2024."
+    ],
+    "weaknesses": [
+      "Lacks measurable impact metrics, using passive phrasing instead of quantifying outcomes (e.g., 'Helped with testing', 'Worked on backend').",
+      "Inconsistent grammatical tenses across experience bullet points, mixing past and present participles ('Worked', 'Helped', 'Building').",
+      "Completely lacks exposure or projects related to Generative AI, LLMs, prompt engineering, or vector databases required by the JD."
+    ],
+    "missing_keywords": [
+      "LLM",
+      "RAG",
+      "Prompt Engineering",
+      "Vector Databases",
+      "LangChain",
+      "FastAPI",
+      "Agentic AI"
+    ],
+    "rewrite_suggestions": [
+      {
+        "original": "Responsible for managing the team's tasks.",
+        "improved": "Coordinated task distribution and sprint planning for a [5]-member intern team, improving sprint velocity by [15]%."
+      },
+      {
+        "original": "Worked on backend development using Node.js and Express.",
+        "improved": "Engineered and optimized [4] REST API endpoints in Node.js and Express, reducing API latency by [20]%."
+      },
+      {
+        "original": "Helped with testing the application.",
+        "improved": "Authored automated unit tests, increasing overall test coverage to [80]% and reducing production bugs by [15]%."
+      },
+      {
+        "original": "Made a website for college events where students can register.",
+        "improved": "Designed and deployed a full-stack campus event portal using React and MongoDB, handling registrations for [500]+ active users."
+      }
+    ]
+  }
+}
