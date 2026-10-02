@@ -2,10 +2,14 @@ import express from 'express'
 import cors from 'cors'
 import multer from 'multer'
 import { detectFileType, extractText, ExtractionError } from './extractText.js'
+import { analyzeResume, AnalysisError } from './analyze.js'
+import { mockAnalysis } from './mockAnalysis.js'
 
 const PORT = process.env.PORT || 5000
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5 MB
 const MAX_JD_LENGTH = 20000
+// MOCK_LLM=true skips the Claude call and returns canned data (UI work without an API key)
+const MOCK_LLM = process.env.MOCK_LLM === 'true'
 
 const app = express()
 app.use(cors())
@@ -34,7 +38,11 @@ app.post('/api/analyze', upload.single('resume'), async (req, res, next) => {
     console.log(`[analyze] ${req.file.originalname} (${fileType}) -> ${resumeText.length} chars extracted`)
     console.log(resumeText.slice(0, 500) + (resumeText.length > 500 ? '\n…' : ''))
 
-    res.json({ resumeText, jobDescription })
+    const started = Date.now()
+    const analysis = MOCK_LLM ? mockAnalysis(Boolean(jobDescription)) : await analyzeResume(resumeText, jobDescription)
+    console.log(`[analyze] done in ${((Date.now() - started) / 1000).toFixed(1)}s`)
+    console.log(JSON.stringify(analysis, null, 2))
+    res.json(analysis)
   } catch (err) {
     next(err)
   }
@@ -46,6 +54,9 @@ app.use((err, req, res, next) => {
     const message =
       err.code === 'LIMIT_FILE_SIZE' ? 'File is too large. Maximum size is 5 MB.' : `Upload error: ${err.message}`
     return res.status(400).json({ error: message })
+  }
+  if (err instanceof AnalysisError) {
+    return res.status(err.status).json({ error: err.message })
   }
   if (err instanceof ExtractionError) {
     return res.status(422).json({ error: err.message })
