@@ -1,0 +1,23 @@
+SAMPLE JOB DESCRIPTION (written for testing — replace with a real posting if you have one)
+
+Role: Agentic AI Engineer (Entry level / Graduate)
+
+About the role
+We are building LLM-powered agents that plan, call tools and complete multi-step tasks for our customers. You will design, build and evaluate these agents end to end, from prompt and tool design to production monitoring.
+
+What you'll do
+- Build LLM agents that use tool/function calling to work with APIs, databases and internal services
+- Design prompts, system instructions and structured outputs (JSON schemas) for reliable agent behaviour
+- Build retrieval-augmented generation (RAG) pipelines with embeddings and vector databases
+- Orchestrate multi-step and multi-agent workflows (e.g. LangGraph, LangChain, CrewAI, or custom loops)
+- Write evaluations (evals) to measure agent accuracy, cost and latency, and iterate on failures
+- Ship agents behind REST APIs and monitor them in production (logging, tracing, guardrails)
+
+What we're looking for
+- Strong Python; TypeScript/Node.js is a plus
+- Hands-on projects using LLM APIs (OpenAI, Anthropic Claude, Google Gemini or open-source models)
+- Understanding of prompt engineering, tool use, context management and agent memory
+- Experience with vector databases (e.g. Pinecone, Chroma, pgvector, FAISS)
+- Familiarity with FastAPI or Express, Docker, Git and cloud deployment
+- Ability to measure results: accuracy, latency, cost per task
+- Bonus: Model Context Protocol (MCP), agent observability tools (LangSmith, Langfuse), fine-tuning basics
