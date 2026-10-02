@@ -14,9 +14,9 @@ function validateFile(file) {
   return null
 }
 
-export default function UploadForm({ onSubmit, error }) {
-  const [file, setFile] = useState(null)
-  const [jobDescription, setJobDescription] = useState('')
+export default function UploadForm({ onSubmit, error, initialInput }) {
+  const [file, setFile] = useState(initialInput?.file ?? null)
+  const [jobDescription, setJobDescription] = useState(initialInput?.jobDescription ?? '')
   const [dragActive, setDragActive] = useState(false)
   const [fileError, setFileError] = useState(null)
   const inputRef = useRef(null)
@@ -37,7 +37,7 @@ export default function UploadForm({ onSubmit, error }) {
   function handleSubmit(e) {
     e.preventDefault()
     if (!file) {
-      setFileError('Please choose a resume file first.')
+      setFileError((current) => current || 'Please choose a resume file first.')
       return
     }
     onSubmit({ file, jobDescription: jobDescription.trim() })

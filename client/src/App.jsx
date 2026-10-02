@@ -2,26 +2,34 @@ import { useState } from 'react'
 import UploadForm from './components/UploadForm'
 import LoadingState from './components/LoadingState'
 import Results from './components/Results'
-import { mockAnalysis } from './mockData'
+import { analyzeResume } from './api'
 
 export default function App() {
   // 'upload' -> 'loading' -> 'results'
   const [view, setView] = useState('upload')
   const [analysis, setAnalysis] = useState(null)
   const [fileName, setFileName] = useState('')
+  const [error, setError] = useState(null)
+  // Last submission, so the form is pre-filled if the request fails
+  const [lastInput, setLastInput] = useState(null)
 
-  function handleSubmit({ file, jobDescription }) {
+  async function handleSubmit({ file, jobDescription }) {
     setFileName(file.name)
+    setLastInput({ file, jobDescription })
+    setError(null)
     setView('loading')
-    // Mock flow: simulate network latency, then show sample data.
-    setTimeout(() => {
-      setAnalysis(jobDescription ? mockAnalysis : { ...mockAnalysis, jd_match_score: null, missing_keywords: [] })
+    try {
+      setAnalysis(await analyzeResume(file, jobDescription))
       setView('results')
-    }, 1500)
+    } catch (err) {
+      setError(err.message)
+      setView('upload')
+    }
   }
 
   function handleReset() {
     setAnalysis(null)
+    setLastInput(null)
     setView('upload')
   }
 
@@ -35,7 +43,7 @@ export default function App() {
       </header>
 
       <main className="mx-auto max-w-4xl px-4 py-10">
-        {view === 'upload' && <UploadForm onSubmit={handleSubmit} />}
+        {view === 'upload' && <UploadForm onSubmit={handleSubmit} error={error} initialInput={lastInput} />}
         {view === 'loading' && <LoadingState fileName={fileName} />}
         {view === 'results' && analysis && <Results analysis={analysis} onReset={handleReset} />}
       </main>
