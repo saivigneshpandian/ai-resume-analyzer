@@ -9,7 +9,7 @@ export const hero = {
   subHeadline:
     'Upload your resume and get a score out of 100, your strongest and weakest points, and line-by-line rewrites — judged against the same recruiter rubric every time.',
   ctaText: 'Get My Resume Score',
-  reassurance: ['No sign-up', 'PDF or DOCX', 'Your file is never saved'],
+  reassurance: ['No sign-up', 'Results in one go', 'Your file is never saved'],
 }
 
 export const problem = {
@@ -18,18 +18,22 @@ export const problem = {
     'If you’re tired of applying into silence, getting “looks fine” from friends, and pasting your resume into a chatbot that says something different every time — you’re in the right place.',
   painPoints: [
     {
+      icon: 'inbox',
       title: 'Applications go nowhere',
       body: 'You’ve sent out dozens of applications, heard nothing back, and still don’t know which line is costing you the interview.',
     },
     {
+      icon: 'clock',
       title: 'Reviews take days',
       body: 'Waiting on a senior or mentor slows you down — and two reviewers rarely agree on what to fix.',
     },
     {
+      icon: 'search',
       title: 'Keyword checkers miss the point',
       body: 'ATS scanners count keywords, but they can’t tell you that “Worked on backend development” says nothing.',
     },
     {
+      icon: 'message',
       title: 'Chatbots give vague feedback',
       body: 'Paste your resume into a generic chatbot and you get padded advice framed differently every time.',
     },
@@ -59,22 +63,26 @@ export const benefits = {
   heading: 'Feedback you can act on in one sitting',
   items: [
     {
+      icon: 'gauge',
       title: 'A score you can track',
       feature: 'An overall score out of 100 based on the rubric.',
       benefit: 'So you know where you stand — and can see whether each edit moves the needle.',
     },
     {
+      icon: 'list',
       title: 'Specific, not generic',
       feature: '3–5 strengths and 3–5 weaknesses, each tied to your actual resume.',
       benefit: 'So you know exactly what to fix, instead of “add more detail.”',
     },
     {
+      icon: 'edit',
       title: 'Rewrites you can use',
       feature: 'Before-and-after rewrites of your weakest lines.',
       benefit:
         'So vague duties become measurable results. Where a number is missing, you get a [placeholder] to fill with your real figure.',
     },
     {
+      icon: 'target',
       title: 'Tailored to the job',
       feature: 'Paste a job description to get a match score and missing keywords.',
       benefit: 'So each application speaks the language of the role you’re applying for.',
@@ -111,9 +119,9 @@ export const faq = {
       answer: 'No. There’s no sign-up and no payment step — upload a file and get your results.',
     },
     {
-      question: 'What happens to my resume?',
+      question: 'Can I trust the feedback — and what happens to my file?',
       answer:
-        'It isn’t saved. The file is read in memory, its text is sent to Claude (Anthropic’s AI model) for the review, and it’s discarded once your results are returned.',
+        'The review is done by Claude, Anthropic’s AI model, following a published rubric and worked examples, so you can see exactly what you’re being judged on. Your file isn’t saved: it’s read in memory, its text is sent to Claude for the review, and it’s discarded once your results are returned.',
     },
     {
       question: 'Should I just apply as-is?',

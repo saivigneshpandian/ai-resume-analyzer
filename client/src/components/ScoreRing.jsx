@@ -26,11 +26,11 @@ export default function ScoreRing({ score, label, size = 168 }) {
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className={`font-display font-semibold text-ink ${size > 140 ? 'text-5xl' : 'text-4xl'}`}>{score}</span>
-          <span className="text-xs text-muted">out of 100</span>
+          <span className={`font-display font-extrabold text-ink tabular-nums ${size > 140 ? 'text-5xl' : 'text-4xl'}`}>{score}</span>
+          <span className="text-sm text-muted">/ 100</span>
         </div>
       </div>
-      <p className="mt-3 text-sm font-medium text-ink-soft">{label}</p>
+      <p className="mt-3 font-medium text-ink-soft">{label}</p>
     </div>
   )
 }
